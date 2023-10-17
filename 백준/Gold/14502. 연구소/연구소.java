@@ -1,26 +1,25 @@
-import java.io.*;
 import java.util.*;
+import java.io.*;
 
 public class Main {
 
-    static final int dx[] = {0,0,1,-1};  //상하좌우 방향 설정
-    static final int dy[] = {1,-1,0,0};  //상화좌우 방향 설정
-    static int originalMap[][];
-    static int n,m;
-    static int maxSafeZone = Integer.MIN_VALUE; //최대값을 찾기 위한 최소값 설정
+    static final int[] dx = {1, 0, 0, -1};
+    static final int[] dy = {0, 1, -1, 0};
+    static int[][] originalMap;
+    static int n, m;
+    static int maxSafeZone = Integer.MIN_VALUE;
 
-    public static void main(String[] args) throws IOException {
-        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-
-        n = Integer.parseInt(st.nextToken());
-        m = Integer.parseInt(st.nextToken());
+    public static void main(String[] args) throws Exception {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(System.in));
+        String[] firstLine = bf.readLine().split(" ");
+        n = Integer.parseInt(firstLine[0]);
+        m = Integer.parseInt(firstLine[1]);
         originalMap = new int[n][m];
 
-        for(int i=0; i<n; i++) {
-            st = new StringTokenizer(br.readLine());
-            for(int j=0; j<m; j++) {
-                originalMap[i][j] = Integer.parseInt(st.nextToken());
+        for (int i=0; i<n; i++) {
+            String[] row = bf.readLine().split(" ");
+            for (int j=0; j<m; j++) {
+                originalMap[i][j] = Integer.parseInt(row[j]);
             }
         }
 
@@ -29,16 +28,15 @@ public class Main {
         System.out.println(maxSafeZone);
     }
 
-    static void dfs(int wallCnt) {
-        //벽이 3개가 설치 된 경우 bfs 탐색 시작
-        if(wallCnt == 3) {
+    public static void dfs(int wallCnt) {
+        if (wallCnt == 3) {
             bfs();
             return;
         }
 
-        for(int i=0; i<n; i++) {
-            for(int j=0; j<m; j++) {
-                if(originalMap[i][j] == 0) {
+        for (int i=0; i<n; i++) {
+            for (int j=0; j<m; j++) {
+                if (originalMap[i][j] == 0) {
                     originalMap[i][j] = 1;
                     dfs(wallCnt+1);
                     originalMap[i][j] = 0;
@@ -47,53 +45,47 @@ public class Main {
         }
     }
 
-    static void bfs() {
+    public static void bfs() {
         Queue<Node> q = new LinkedList<>();
 
-        for(int i=0; i<n; i++) {
-            for(int j=0; j<m; j++) {
-                if(originalMap[i][j] == 2) {
+        for (int i=0; i<n; i++) {
+            for (int j=0; j<m; j++) {
+                if (originalMap[i][j] == 2) {
                     q.add(new Node(i,j));
                 }
             }
         }
 
-        //원본 연구소를 바꾸지 않기 위한 카피맵 사용
-        int copyMap[][] = new int[n][m];
+        int[][] copyMap = new int[n][m];
 
-        for (int i = 0; i < n; i++) {
-            copyMap[i] = originalMap[i].clone();
+        for (int i=0; i<n; i++) {
+            copyMap[i] = Arrays.copyOf(originalMap[i], originalMap[i].length);
         }
 
-        //BFS 탐색 시작
-        while(!q.isEmpty()) {
+        while (!q.isEmpty()) {
             Node now = q.poll();
-            int x = now.x; // 현재 값
-            int y = now.y; //
 
-            for(int k=0; k<4; k++) {
-                int nx = x + dx[k];
-                int ny = y + dy[k];
+            for (int k=0; k<4; k++) {
+                int nx = now.x + dx[k];
+                int ny = now.y + dy[k];
 
-                //연구소 범위 밖이 아니고 빈칸일 경우에만 바이러스를 퍼트린다.
-                if(0<=nx && nx<n && 0<=ny && ny<m) {
-                    if(copyMap[nx][ny] == 0) {
-                        q.add(new Node(nx,ny));
+                if (nx >= 0 && nx < n && ny >= 0 && ny < m) {
+                    if (copyMap[nx][ny] == 0) {
                         copyMap[nx][ny] = 2;
+                        q.add(new Node(nx, ny));
                     }
                 }
             }
         }
 
-        //SafeZone 확인
-        funcSafeZone(copyMap);
+        calculateSafeZone(copyMap);
     }
 
-    private static void funcSafeZone(int[][] copyMap) {
-        int safeZone =0;
-        for(int i=0; i<n ; i++) {
-            for(int j=0; j<m; j++) {
-                if(copyMap[i][j] == 0) {
+    private static void calculateSafeZone(int[][] map) {
+        int safeZone = 0;
+        for (int i=0; i<n; i++) {
+            for (int j=0; j<m; j++) {
+                if (map[i][j] == 0) {
                     safeZone++;
                 }
             }
@@ -103,11 +95,11 @@ public class Main {
         }
     }
 
-    //Queue에 좌표값 x,y를 넣기 위함.
-    static class Node {
+    private static class Node {
         int x;
         int y;
-        Node(int x, int y){
+
+        public Node(int x, int y) {
             this.x = x;
             this.y = y;
         }
