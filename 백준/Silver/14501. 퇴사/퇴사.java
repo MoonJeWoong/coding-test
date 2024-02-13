@@ -1,6 +1,4 @@
 import java.io.*;
-import java.util.*;
-import java.util.stream.*;
 
 public class Main {
 
@@ -19,7 +17,6 @@ public class Main {
             dp[n] = counselings[n].amount;
         }
 
-        int currentMaxAmount = dp[n];
         for (int index = n-1; index > 0; index--) {
             if (index + (counselings[index].cost - 1) <= n) {
                 dp[index] = counselings[index].amount;
@@ -27,14 +24,10 @@ public class Main {
                     dp[index] += dp[index + counselings[index].cost];
                 }
             }
-            dp[index] = Math.max(currentMaxAmount, dp[index]);
-            currentMaxAmount = dp[index];
+            dp[index] = Math.max(dp[index], dp[index+1]);
         }
-
-        int maxAmount = Arrays.stream(dp)
-                .max()
-                .getAsInt();
-        System.out.println(maxAmount);
+        
+        System.out.println(dp[1]);
     }
 }
 
